@@ -1,0 +1,89 @@
+@startuml NOCCANOCCA
+
+namespace NOCCARule{
+    class NOCCACore{
+
+    }
+    NOCCARule.NOCCACore --* PiecesBoard.PieceManager
+
+}
+
+namespace PiecesBoard{
+    class PieceScript{
+        + bool isMine
+        + Point point
+        + int step
+        + bool isMoving
+        + bool isSelected
+        + void changePiecePoint(Point pa, Point pb)
+    }
+
+    class PieceManager{
+
+    }
+
+    class PieceMoveAnimation{
+
+    }
+
+    class MasuScript{
+        + Point point
+    }
+
+    class GoalScript{
+        + bool isMine
+    }
+
+    class PiecesBoardGenerator{
+
+    }
+
+    interface IMyInput{
+        Point getPoint()
+    }
+
+    PiecesBoardGenerator-->MasuScript
+    PiecesBoardGenerator-->GoalScript
+    PiecesBoardGenerator-->PieceScript
+    PiecesBoard.PieceScript..|>PiecesBoard.IMyInput
+    PiecesBoard.MasuScript..|>PiecesBoard.IMyInput
+    PiecesBoard.GoalScript..|>PiecesBoard.IMyInput
+    PieceManager---PieceScript
+    PieceMoveAnimation-->PieceScript
+    PieceManager---MasuScript
+    PieceManager---GoalScript
+    PieceManager-->IMyInput
+    PieceManager-->Opponent.IOpponentInput
+}
+
+
+namespace GameManager{
+    enum GameState{
+        + Menu
+        + Battle
+        + Result
+    }
+    class GameTimeManager{
+
+    }
+    class GameManager{
+
+    }
+    GameManager-->GameTimeManager
+    GameManager-->PiecesBoard.PieceManager
+}
+
+namespace Opponent{
+    class CPU{
+
+    }
+    interface IOpponentInput{
+        Point getPoint()
+    }
+    Opponent.CPU..|>Opponent.IOpponentInput
+}
+
+
+
+
+@enduml

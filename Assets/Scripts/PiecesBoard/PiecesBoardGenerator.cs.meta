@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 194ee41277163451ab4d0118941bab33
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - masu: {fileID: 8282978039572935347, guid: cdb57ce352f2e486a8e72bd642726121, type: 3}
+  - goal: {fileID: 5572568510370225730, guid: 4e257cb19aebf4b1a9850492e3bf934b, type: 3}
+  - piece: {fileID: 3301797185472018228, guid: a85b6b00582f441b6b5e22b100e658a1, type: 3}
+  - indicator: {fileID: 3649940460489132232, guid: 9ddc56fd1daf540279be77e084b2e92f,
+      type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
