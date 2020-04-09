@@ -113,7 +113,6 @@ namespace NOCCARule
 
         public Point[] CanMovePoints(Point p)
         {
-            Debug.Log(_isMyTurn.Value);
             var canMovePoints = new Point[] { };
             //ゴール
             if (IsGoal(p) != Goal.None)

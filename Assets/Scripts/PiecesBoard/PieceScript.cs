@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 namespace PiecesBoard
 {
@@ -68,7 +69,35 @@ namespace PiecesBoard
             point = p;
             step = s;
 
-            transform.position = Point2Coord.point2coord(point, defaultPosition.y + step*0.4f);
+            var fromPosition = transform.position;
+            var toPosition = Point2Coord.point2coord(point, defaultPosition.y + step * 0.4f);
+            //transform.position = Point2Coord.point2coord(point, defaultPosition.y + step*0.4f);
+            StartCoroutine(MoveAnimation(fromPosition, toPosition));
+        }
+
+        IEnumerator MoveAnimation(Vector3 fromP, Vector3 toP)
+        {
+            const int moveStep = 10;
+            Vector3 deltaPosition = toP - fromP;
+            float diffx = deltaPosition.x;
+            float diffy = deltaPosition.y;
+            float diffz = deltaPosition.z;
+
+            float delx = diffx / (float)moveStep;
+            float delz = diffz / (float)moveStep;
+
+
+            float topy = Math.Max(diffy, -diffy) + 1f;
+            float a = -(4*topy) / (moveStep*moveStep);
+
+            for (int s = 0; s < moveStep; s++)
+            {
+                var newy = a * s * (s - moveStep);
+                transform.position = new Vector3(fromP.x+delx*s,fromP.y+newy,fromP.z+delz*s);
+                Debug.Log(fromP.y + newy);
+                yield return null;
+            }
+            transform.position = toP;
         }
 
         public Point GetPoint()

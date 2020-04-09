@@ -108,13 +108,11 @@ namespace PiecesBoard
 
         void GameOverProcess()
         {
-            Debug.Log("Gameover!");
             SceneManager.LoadScene("MenuScene");
         }
 
         void SelectPiece()
         {
-            //Debug.Log(nocca.isMyTurn.Value.GetType().FullName);
             if (nocca.isMyturn.Value)
             {
                 //自分のターンの時
