@@ -4,6 +4,7 @@ using UnityEngine;
 using NOCCARule;
 using System;
 using UnityEngine.SceneManagement;
+using UniRx.Async;
 
 public struct Point
 {
@@ -71,6 +72,7 @@ namespace PiecesBoard
             noinited,
             waiteForSlectingPiece,
             waiteForMovingPoint,
+            pieceMoving,
             gameover
         }
 
@@ -106,8 +108,10 @@ namespace PiecesBoard
             }
         }
 
-        void GameOverProcess()
+        async void GameOverProcess()
         {
+            //ゲーム終了後，駒が移動するまで少し待機
+            await UniTask.Delay(TimeSpan.FromSeconds(1));
             SceneManager.LoadScene("MenuScene");
         }
 

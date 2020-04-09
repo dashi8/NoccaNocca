@@ -11,17 +11,17 @@ namespace PiecesBoard
         int step;
         private bool isMine;
         bool isMoving;
-        public bool __isSelected;
+        public bool _isSelected;
 
         public bool isSelected {
             set {
-                __isSelected = value;
+                _isSelected = value;
                 if (!value)
                 {
                     transform.rotation = Quaternion.Euler(0f, 0f, 0f);
                 }
             }
-            get {return __isSelected; }
+            get {return _isSelected; }
                 }
         float time = 0;
         float fre = 0.5f;
@@ -77,6 +77,7 @@ namespace PiecesBoard
 
         IEnumerator MoveAnimation(Vector3 fromP, Vector3 toP)
         {
+            isMoving = true;
             const int moveStep = 10;
             Vector3 deltaPosition = toP - fromP;
             float diffx = deltaPosition.x;
@@ -94,10 +95,10 @@ namespace PiecesBoard
             {
                 var newy = a * s * (s - moveStep);
                 transform.position = new Vector3(fromP.x+delx*s,fromP.y+newy,fromP.z+delz*s);
-                Debug.Log(fromP.y + newy);
                 yield return null;
             }
             transform.position = toP;
+            isMoving = false;
         }
 
         public Point GetPoint()
