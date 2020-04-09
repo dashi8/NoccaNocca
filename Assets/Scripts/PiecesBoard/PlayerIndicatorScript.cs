@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UniRx;
 
 namespace PiecesBoard
 {
@@ -36,16 +37,19 @@ namespace PiecesBoard
 
         }
 
-        public void ChangeTurn(bool isMyTurn)
+        public void RegistTurnReactiveProperty(IReactiveProperty<bool> _isMyTurn)
         {
-            if (isMyTurn)
+            _isMyTurn.Subscribe(isMyTurn=>
             {
-                transform.position = myIndicatorPotision;
-            }
-            else
-            {
-                transform.position = oppIndicatorPotision;
-            }
+                if (isMyTurn)
+                {
+                    transform.position = myIndicatorPotision;
+                }
+                else
+                {
+                    transform.position = oppIndicatorPotision;
+                }
+            });
         }
     }
 }

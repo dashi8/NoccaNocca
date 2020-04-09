@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using PiecesBoard;
+using UniRx;
 
 namespace NOCCARule
 {
@@ -17,16 +18,10 @@ namespace NOCCARule
         //1:自分，-1：相手
         //高さ方向がy
         int[,,] state = new int[XRANGE, YRANGE, ZRANGE];
-        private bool _isMyTurn;
-        public bool isMyTurn
+        private ReactiveProperty<bool> _isMyTurn = new ReactiveProperty<bool>(true);
+        public IReactiveProperty<bool> isMyturn
         {
-            get {
-                return _isMyTurn;
-            }
-            set {
-                _isMyTurn = value;
-                indicatorScript.ChangeTurn(value);
-            }
+            get { return _isMyTurn; }
         }
 
         public bool isGameOver;
@@ -43,6 +38,7 @@ namespace NOCCARule
         {
             isGameOver = false;
             winner = 0;
+            _isMyTurn.Value = true;
 
             foreach (int x in new int[] { 0, XRANGE - 1 })
             {
@@ -51,12 +47,6 @@ namespace NOCCARule
                     state[x, 0, z] = (x == 0) ? 1 : -1;
                 }
             }
-        }
-
-        public void RegistIndicator()
-        {
-            indicatorScript = GameObject.FindGameObjectWithTag("IndicatorTag").GetComponent<PlayerIndicatorScript>();
-            isMyTurn = true;
         }
 
         public int Move(Point pre, Point next)
@@ -87,7 +77,7 @@ namespace NOCCARule
                 state[next.x, nextTopState[1] + 1, next.z] = preTopState[0];
                 state[pre.x, preTopState[1], pre.z] = 0;
 
-                isMyTurn = !isMyTurn;
+                _isMyTurn.Value = !_isMyTurn.Value;
 
                 CheckAllPieceCannotMove();
 
@@ -103,7 +93,7 @@ namespace NOCCARule
                 for(int z = 0; z < ZRANGE; z++)
                 {
                     Point tempPoint = new Point(x, z);
-                    if (TopState(tempPoint)[0] == (isMyTurn ? 1 : -1))
+                    if (TopState(tempPoint)[0] == (_isMyTurn.Value ? 1 : -1))
                     {
                         if (CanMovePoints(tempPoint).Length > 0)
                         {
@@ -117,13 +107,13 @@ namespace NOCCARule
             if (cannotMove)
             {
                 isGameOver = true;
-                winner = isMyTurn ? -1 : 1;
+                winner = _isMyTurn.Value ? -1 : 1;
             }
         }
 
         public Point[] CanMovePoints(Point p)
         {
-            Debug.Log(isMyTurn);
+            Debug.Log(_isMyTurn.Value);
             var canMovePoints = new Point[] { };
             //ゴール
             if (IsGoal(p) != Goal.None)
@@ -132,7 +122,7 @@ namespace NOCCARule
             }
 
             //手番と駒が一致
-            if ((TopState(p)[0] == 1 && isMyTurn) || (TopState(p)[0] == -1 && !isMyTurn)) {
+            if ((TopState(p)[0] == 1 && _isMyTurn.Value) || (TopState(p)[0] == -1 && !_isMyTurn.Value)) {
                 //周囲8箇所を確認
                 var piteration = new Point[] {
                     new Point(0,1),

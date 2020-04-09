@@ -90,8 +90,7 @@ namespace PiecesBoard
             {
                 case GameState.noinited:
                     //Start()で呼ぶとなぜかfindできない
-                    nocca.RegistIndicator();
-                    gameState = GameState.waiteForSlectingPiece;
+                    InitUnirx();
                     break;
                 case GameState.waiteForSlectingPiece:
                     SelectPiece();
@@ -116,7 +115,7 @@ namespace PiecesBoard
         void SelectPiece()
         {
             //Debug.Log(nocca.isMyTurn.Value.GetType().FullName);
-            if (nocca.isMyTurn)
+            if (nocca.isMyturn.Value)
             {
                 //自分のターンの時
                 if (Input.GetMouseButtonUp(0))
@@ -194,6 +193,13 @@ namespace PiecesBoard
                 canMovePoints = new Point[] { };
                 gameState = GameState.waiteForSlectingPiece;
             }
+        }
+
+        void InitUnirx()
+        {
+            var PIScript = GameObject.FindGameObjectWithTag("IndicatorTag").GetComponent<PlayerIndicatorScript>();
+            PIScript.RegistTurnReactiveProperty(nocca.isMyturn);
+            gameState = GameState.waiteForSlectingPiece;
         }
 
         GameObject GetClickedGameObject()
