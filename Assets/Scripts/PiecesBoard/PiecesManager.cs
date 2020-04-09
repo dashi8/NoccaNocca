@@ -63,6 +63,7 @@ namespace PiecesBoard
     {
         NOCCACore nocca = new NOCCACore();
         GameState gameState;
+        public static bool winner;
 
         PieceScript selectedPieceScript;
         Point[] canMovePoints;
@@ -108,11 +109,19 @@ namespace PiecesBoard
             }
         }
 
+        public static bool getWinner()
+        {
+            return winner;
+        }
+
         async void GameOverProcess()
         {
             //ゲーム終了後，駒が移動するまで少し待機
             await UniTask.Delay(TimeSpan.FromSeconds(1));
-            SceneManager.LoadScene("MenuScene");
+
+            winner = nocca.winner==1?true:false;
+            SceneManager.LoadScene("ResultScene");
+            //SceneManager.LoadScene("MenuScene");
         }
 
         void SelectPiece()
