@@ -3,11 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace MoveGenerator {
-    interface IMoveGenerator
-    {
-        Point? GetInputPoint();
-    }
-
     public abstract class AMoveGenerator
     {
         //NOCCACOre.MyGoalPoint, OppGoalPointとかぶらないように設定しないとだめ．．．
