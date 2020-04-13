@@ -66,7 +66,9 @@ namespace PiecesBoard
             {
                 for(int z = 0; z < NOCCACore.ZRANGE; z++)
                 {
-                    PieceScript pieceScript = Instantiate(piece, piece.transform.position, piece.transform.rotation).GetComponent<PieceScript>();
+                    var pieceObject = Instantiate(piece, piece.transform.position, piece.transform.rotation);
+                    pieceObject.tag = "PieceTag";
+                    PieceScript pieceScript = pieceObject.GetComponent<PieceScript>();
                     pieceScript.Init(new Point(x, z), x == 0);
                 }
             }

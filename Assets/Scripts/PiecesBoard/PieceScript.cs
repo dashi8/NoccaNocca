@@ -105,5 +105,10 @@ namespace PiecesBoard
         {
             return point;
         }
+
+        public int GetStep()
+        {
+            return step;
+        }
     }
 }

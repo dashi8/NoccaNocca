@@ -5,6 +5,7 @@ using NOCCARule;
 using System;
 using UnityEngine.SceneManagement;
 using UniRx.Async;
+using MoveGenerator;
 
 public struct Point
 {
@@ -65,6 +66,7 @@ namespace PiecesBoard
         GameState gameState;
         public static bool winner;
 
+        MyMove myMove = new MyMove();
         PieceScript selectedPieceScript;
         Point[] canMovePoints;
 
@@ -129,21 +131,16 @@ namespace PiecesBoard
             if (nocca.isMyturn.Value)
             {
                 //自分のターンの時
-                if (Input.GetMouseButtonUp(0))
+                Point? tmpInput = myMove.GetInputPoint();
+                if(tmpInput != null && tmpInput != myMove.clickedNonIMyInputObject)
                 {
-                    GameObject clickedGameObject = GetClickedGameObject();
-                    if (clickedGameObject != null && clickedGameObject.GetComponent<PieceScript>() != null)
+                    canMovePoints = nocca.CanMovePoints(tmpInput.Value);
+                    if (canMovePoints.Length > 0)
                     {
-                        PieceScript clickedPieceScript = clickedGameObject.GetComponent<PieceScript>();
-                        Point inputPoint = clickedPieceScript.GetPoint();
-                        canMovePoints = nocca.CanMovePoints(inputPoint);
-                        if (canMovePoints.Length > 0)
-                        {
-                            //移動できる駒が選択された
-                            gameState = GameState.waiteForMovingPoint;
-                            selectedPieceScript = clickedPieceScript;
-                            selectedPieceScript.isSelected = true;
-                        }
+                        //移動できる駒が選択された
+                        gameState = GameState.waiteForMovingPoint;
+                        selectedPieceScript = getPieceScript(tmpInput.Value);
+                        selectedPieceScript.isSelected = true;
                     }
                 }
             }
@@ -173,36 +170,32 @@ namespace PiecesBoard
 
         void SelectMovePoint()
         {
-            if (Input.GetMouseButtonUp(0))
+            Point? tmpInput = myMove.GetInputPoint();
+            if (tmpInput != null)
             {
-                GameObject clickedGameObject = GetClickedGameObject();
-                if (clickedGameObject != null && clickedGameObject.GetComponent<IMyInput>() != null)
+                if (tmpInput != myMove.clickedNonIMyInputObject)
                 {
-                    IMyInput clickedIMyInputScript = clickedGameObject.GetComponent<IMyInput>();
-                    Point inputPoint = clickedIMyInputScript.GetPoint();
-                    if (Array.IndexOf(canMovePoints,inputPoint)!=-1)
+                    //IMyInputがクリックされた
+                    if (Array.IndexOf(canMovePoints, tmpInput.Value) != -1)
                     {
                         //移動先が選択された
-                        int step = nocca.Move(selectedPieceScript.GetPoint(), inputPoint);
-                        selectedPieceScript.changePoint(inputPoint, step);
-
-                        selectedPieceScript.isSelected = false;
-                        selectedPieceScript = null;
-                        canMovePoints = new Point[] { };
-                        gameState = GameState.waiteForSlectingPiece;
-
-                        if (nocca.isGameOver)
-                        {
-                            gameState = GameState.gameover;
-                        }
-                        return;
+                        int step = nocca.Move(selectedPieceScript.GetPoint(), tmpInput.Value);
+                        selectedPieceScript.changePoint(tmpInput.Value, step);
                     }
                 }
-                //選択解除
+                //クリックされた常に実行
                 selectedPieceScript.isSelected = false;
                 selectedPieceScript = null;
                 canMovePoints = new Point[] { };
-                gameState = GameState.waiteForSlectingPiece;
+
+                if (nocca.isGameOver)
+                {
+                    gameState = GameState.gameover;
+                }
+                else
+                {
+                    gameState = GameState.waiteForSlectingPiece;
+                }
             }
         }
 
@@ -213,9 +206,25 @@ namespace PiecesBoard
             gameState = GameState.waiteForSlectingPiece;
         }
 
+        PieceScript getPieceScript(Point p)
+        {
+            var pieces = GameObject.FindGameObjectsWithTag("PieceTag");
+            var maxStep = -1;
+            PieceScript ansPscript = null;
+            foreach(GameObject tmpPobj in pieces)
+            {
+                var tmpPscript = tmpPobj.GetComponent<PieceScript>();
+                if(tmpPscript.GetPoint() == p && tmpPscript.GetStep()>maxStep)
+                {
+                    maxStep = tmpPscript.GetStep();
+                    ansPscript = tmpPscript;
+                }
+            }
+            return ansPscript;
+        }
+
         GameObject GetClickedGameObject()
         {
-            Point? ans = null;
             GameObject clickedGameObject = null;
 
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
