@@ -64,9 +64,10 @@ namespace PiecesBoard
     {
         NOCCACore nocca = new NOCCACore();
         GameState gameState;
-        public static bool winner;
 
-        MyMove myMove = new MyMove();
+        AMoveGenerator myMove = null;
+        AMoveGenerator oppMove = null;
+
         PieceScript selectedPieceScript;
         Point[] canMovePoints;
 
@@ -86,6 +87,9 @@ namespace PiecesBoard
             gameState = GameState.noinited;
             selectedPieceScript = null;
             canMovePoints = new Point[]{ };
+
+            myMove = getMoveGenerator("MyMove");
+            oppMove = getMoveGenerator("OppMove");
         }
 
         // Update is called once per frame
@@ -111,9 +115,32 @@ namespace PiecesBoard
             }
         }
 
-        public static bool getWinner()
+        AMoveGenerator getMoveGenerator(string player)
         {
-            return winner;
+            PlayerSetting playerSetting = MenuSceneScript.myPlayerSetting;
+            if (player == "MyMove")
+            {
+                playerSetting = MenuSceneScript.myPlayerSetting;
+            }
+            else if(player == "OppMove")
+            {
+                playerSetting = MenuSceneScript.oppPlayerSetting;
+            }
+            else
+            {
+                Debug.Log("ここには来ないはず");
+            }
+
+            switch (playerSetting)
+            {
+                case PlayerSetting.My:
+                    //Start()で呼ぶとなぜかfindできない
+                    return new MyMove();
+                case PlayerSetting.Cpu:
+                    return new CPUMove(nocca);
+                default:
+                    return new MyMove();
+            }
         }
 
         async void GameOverProcess()
@@ -121,56 +148,47 @@ namespace PiecesBoard
             //ゲーム終了後，駒が移動するまで少し待機
             await UniTask.Delay(TimeSpan.FromSeconds(1));
 
-            winner = nocca.winner==1?true:false;
             SceneManager.LoadScene("ResultScene");
             //SceneManager.LoadScene("MenuScene");
         }
 
         void SelectPiece()
         {
-            if (nocca.isMyturn.Value)
+            Point? tmpInput = null;
+            if (nocca.isMyTurn.Value)
             {
-                //自分のターンの時
-                Point? tmpInput = myMove.GetInputPoint();
-                if(tmpInput != null && tmpInput != myMove.clickedNonIMyInputObject)
-                {
-                    canMovePoints = nocca.CanMovePoints(tmpInput.Value);
-                    if (canMovePoints.Length > 0)
-                    {
-                        //移動できる駒が選択された
-                        gameState = GameState.waiteForMovingPoint;
-                        selectedPieceScript = getPieceScript(tmpInput.Value);
-                        selectedPieceScript.isSelected = true;
-                    }
-                }
+                tmpInput = myMove.GetInputPoint();
             }
             else
             {
-                //相手のターンの時
-                //とりあえずコピペ
-                if (Input.GetMouseButtonUp(0))
+                tmpInput = oppMove.GetInputPoint();
+            }
+            
+            if(tmpInput != null && tmpInput != myMove.clickedNonIMyInputObject)
+            {
+                canMovePoints = nocca.CanMovePointsFrom(tmpInput.Value);
+                if (canMovePoints.Length > 0)
                 {
-                    GameObject clickedGameObject = GetClickedGameObject();
-                    if (clickedGameObject != null && clickedGameObject.GetComponent<PieceScript>() != null)
-                    {
-                        PieceScript clickedPieceScript = clickedGameObject.GetComponent<PieceScript>();
-                        Point inputPoint = clickedPieceScript.GetPoint();
-                        canMovePoints = nocca.CanMovePoints(inputPoint);
-                        if (canMovePoints.Length > 0)
-                        {
-                            //移動できる駒が選択された
-                            gameState = GameState.waiteForMovingPoint;
-                            selectedPieceScript = clickedPieceScript;
-                            selectedPieceScript.isSelected = true;
-                        }
-                    }
+                    //移動できる駒が選択された
+                    gameState = GameState.waiteForMovingPoint;
+                    selectedPieceScript = getPieceScript(tmpInput.Value);
+                    selectedPieceScript.isSelected = true;
                 }
             }
         }
 
         void SelectMovePoint()
         {
-            Point? tmpInput = myMove.GetInputPoint();
+            Point? tmpInput = null;
+            if (nocca.isMyTurn.Value)
+            {
+                tmpInput = myMove.GetInputPoint();
+            }
+            else
+            {
+                tmpInput = oppMove.GetInputPoint();
+            }
+
             if (tmpInput != null)
             {
                 if (tmpInput != myMove.clickedNonIMyInputObject)
@@ -202,7 +220,7 @@ namespace PiecesBoard
         void InitUnirx()
         {
             var PIScript = GameObject.FindGameObjectWithTag("IndicatorTag").GetComponent<PlayerIndicatorScript>();
-            PIScript.RegistTurnReactiveProperty(nocca.isMyturn);
+            PIScript.RegistTurnReactiveProperty(nocca.isMyTurn);
             gameState = GameState.waiteForSlectingPiece;
         }
 

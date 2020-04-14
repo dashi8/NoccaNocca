@@ -18,13 +18,18 @@ namespace NOCCARule
         //高さ方向がy
         int[,,] state = new int[XRANGE, YRANGE, ZRANGE];
         private ReactiveProperty<bool> _isMyTurn = new ReactiveProperty<bool>(true);
-        public IReactiveProperty<bool> isMyturn
+        public IReactiveProperty<bool> isMyTurn
         {
             get { return _isMyTurn; }
         }
 
-        public bool isGameOver;
-        public int winner;
+        public bool isGameOver { get; private set; }
+        //public static int _winner;
+        public static int winner { get; private set; }
+        //public int winner
+        //{
+        //    get { return _winner; }
+        //}
 
         enum Goal
         {
@@ -94,7 +99,7 @@ namespace NOCCARule
                     Point tempPoint = new Point(x, z);
                     if (TopState(tempPoint)[0] == (_isMyTurn.Value ? 1 : -1))
                     {
-                        if (CanMovePoints(tempPoint).Length > 0)
+                        if (CanMovePointsFrom(tempPoint).Length > 0)
                         {
                             cannotMove = false;
                             break;
@@ -110,7 +115,7 @@ namespace NOCCARule
             }
         }
 
-        public Point[] CanMovePoints(Point p)
+        public Point[] CanMovePointsFrom(Point p)
         {
             var canMovePoints = new Point[] { };
             //ゴール
@@ -159,6 +164,24 @@ namespace NOCCARule
             return canMovePoints;
         }
 
+        public Point[] CanMovePiecesPoints()
+        {
+            var canMovePoints = new Point[] { };
+            for(int x = 0; x < XRANGE; x++)
+            {
+                for(int z = 0; z < ZRANGE; z++)
+                {
+                    var checkingPoint = new Point(x, z);
+                    if(TopState(checkingPoint)[0] == (_isMyTurn.Value ? 1 : -1))
+                    {
+                        Array.Resize(ref canMovePoints, canMovePoints.Length + 1);
+                        canMovePoints[canMovePoints.Length - 1] = checkingPoint;
+                    }
+                }
+            }
+            return canMovePoints;
+        }
+
         //{topstate, step}を返す
         int[] TopState(Point p)
         {
@@ -191,6 +214,31 @@ namespace NOCCARule
             else { g = Goal.None; }
 
             return g;
+        }
+
+        public int[,,] GetState()
+        {
+            //deepcopyする便利な機能ないの？
+            int[,,] copiedState = new int[XRANGE, YRANGE, ZRANGE];
+
+            for (int x = 0; x < XRANGE; x++)
+            {
+                for (int y = 0; y < YRANGE; y++)
+                {
+                    for (int z = 0; z < ZRANGE; z++)
+                    {
+                        copiedState[x, y, z] = state[x, y, z];
+                    }
+                }
+            }
+
+            return copiedState;
+        }
+
+        public static bool getWinner()
+        {
+            //result画面への受け渡し用
+            return winner == 1 ? true : false;
         }
     }
 }
