@@ -9,7 +9,7 @@ namespace NOCCARule
         public readonly static int XRANGE = 6;
         public readonly static int ZRANGE = 5;
         public readonly static int YRANGE = 3;
-        public readonly static Point MyGoalPoint = new Point(-2, -2);
+        public readonly static Point MyGoalPoint = new Point(-2, -2);//自分が目指すMyGoalPoint
         public readonly static Point OppGoalPoint = new Point(-1, -1);
 
 
@@ -24,12 +24,7 @@ namespace NOCCARule
         }
 
         public bool isGameOver { get; private set; }
-        //public static int _winner;
         public static int winner { get; private set; }
-        //public int winner
-        //{
-        //    get { return _winner; }
-        //}
 
         enum Goal
         {
@@ -55,6 +50,17 @@ namespace NOCCARule
 
         public int Move(Point pre, Point next)
         {
+            //動かせるPointが渡されること前提
+            //呼び出す側で確認する
+
+            var preTopState = TopState(pre);
+            var nextTopState = TopState(next);
+            if (preTopState[0] != (_isMyTurn.Value ? 1 : -1))
+            {
+                //現ターンではないの駒を移動しようとした
+                return -2;
+            }
+
             if (isGameOver)
             {
                 return -1;
@@ -76,8 +82,10 @@ namespace NOCCARule
             }
             else
             {
-                var preTopState = TopState(pre);
-                var nextTopState = TopState(next);
+                if (preTopState[0] != (_isMyTurn.Value ? 1 : -1))
+                {
+                    return -2;
+                }
                 state[next.x, nextTopState[1] + 1, next.z] = preTopState[0];
                 state[pre.x, preTopState[1], pre.z] = 0;
 
@@ -87,6 +95,38 @@ namespace NOCCARule
 
                 return nextTopState[1] + 1;
             }
+        }
+
+        //cpuが利用
+        //プロパティは変更しない
+        //駒が動かせないときはnullを返す
+        //nextにgoalを渡すのは禁止
+        public int[,,] CheckNextState(Point pre, Point next)
+        {
+            //動かせるPointが渡されること前提
+            //呼び出す側で確認する
+            var preTopState = TopState(pre);
+            var nextTopState = TopState(next);
+            if (preTopState[0] == 0)
+            {
+                //preに駒がない
+                return null;
+            }
+
+            if (next == MyGoalPoint)
+            {
+                return null;
+            }
+            else if (next == OppGoalPoint)
+            {
+                return null;
+            }
+
+            int[,,] returnState = GetState();
+            returnState[next.x, nextTopState[1] + 1, next.z] = preTopState[0];
+            returnState[pre.x, preTopState[1], pre.z] = 0;
+
+            return returnState;
         }
 
         void CheckAllPieceCannotMove()
@@ -111,10 +151,11 @@ namespace NOCCARule
             if (cannotMove)
             {
                 isGameOver = true;
-                winner = _isMyTurn.Value ? -1 : 1;
+                winner = _isMyTurn.Value ? -1 : 1; //逆のターンを返す
             }
         }
 
+        //csを設定するときは必ずctも設定する．
         public Point[] CanMovePointsFrom(Point p)
         {
             var canMovePoints = new Point[] { };
@@ -151,7 +192,7 @@ namespace NOCCARule
                     }
                 }
                 //ゴールも追加
-                if(TopState(p)[0]==1 && p.x == XRANGE - 1)
+                if(TopState(p)[0] == 1 && p.x == XRANGE - 1)
                 {
                     Array.Resize(ref canMovePoints, canMovePoints.Length + 1);
                     canMovePoints[canMovePoints.Length - 1] = MyGoalPoint;
@@ -183,16 +224,30 @@ namespace NOCCARule
         }
 
         //{topstate, step}を返す
-        int[] TopState(Point p)
+        public int[] TopState(Point p, int[,,] sc = null)
         {
+            int[,,] checkState = new int[,,] { };
+            if(sc == null)
+            {
+                checkState = state;
+            }
+            else
+            {
+                checkState = sc;
+            }
             int topState = 0;
             int step = -1;
+            //ゴールの時
+            if(p == MyGoalPoint || p == OppGoalPoint)
+            {
+                return new int[] { 0, 0 };
+            }
             //手番と駒が一致
             for (int y = YRANGE - 1; y >= 0; y--)
             {
-                if (state[p.x, y, p.z] != 0)
+                if (checkState[p.x, y, p.z] != 0)
                 {
-                    topState = state[p.x, y, p.z];
+                    topState = checkState[p.x, y, p.z];
                     step = y;
                     break;
                 }
