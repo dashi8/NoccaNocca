@@ -84,7 +84,7 @@ namespace MoveGenerator
                 foreach(Point next in nextCandidate)
                 {
                     //OppGoalに入れるならそこを選んで終わり
-                    if(next == NOCCACore.OppGoalPoint)
+                    if(next == (player == -1 ? NOCCACore.OppGoalPoint: NOCCACore.MyGoalPoint))
                     {
                         movingPoint = pre;
                         destinationPoint = next;
@@ -153,9 +153,9 @@ namespace MoveGenerator
                 {
                     for (int z = 0; z < NOCCACore.ZRANGE; z++)
                     {
-                        if (state[x, y, z] == -1)
+                        if (state[x, y, z] == player)
                         {
-                            ans += 6 - x;
+                            ans += player == 1 ? x + 1 : 6 - x;
                         }
                     }
                 }
@@ -171,20 +171,20 @@ namespace MoveGenerator
                 for (int z = 0; z < NOCCACore.ZRANGE; z++)
                 {
                     int topState = nocca.TopState(new Point(x,z), state)[0];
-                    if (topState == -1)
+                    if (topState == player)
                     {
-                        ans += 6 - x;
-                        if (x == 0)
+                        ans += player == 1 ? x + 1 : 6 - x;
+                        if (x == (player == -1 ? 0 : 5))
                         {
                             ans += 6;
                         }
                     }
-                    if (topState == 1)
+                    if (topState == -player)
                     {
-                        ans -= 6 - x;
-                        if (x == 5)
+                        ans -= player == 1 ? x + 1 : 6 - x;
+                        if (x == (player == -1 ? 5 : 0))
                         {
-                            ans -= 5;
+                            ans -= 6;
                         }
                     }
                 }
@@ -216,7 +216,7 @@ namespace MoveGenerator
                         if (0 <= (tmpP + pi).x && (tmpP + pi).x < NOCCACore.XRANGE && 0 <= (tmpP + pi).z && (tmpP + pi).z < NOCCACore.ZRANGE)
                         {
                             int topState = nocca.TopState(tmpP + pi, state)[0];
-                            if (topState == 1)
+                            if (topState == -player)
                             {
                                 ans += 1;
                             }

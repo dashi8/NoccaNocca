@@ -17,13 +17,13 @@ public class MenuSceneScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     static public void ChangeToPlayScene(PlayerSetting mySetting, PlayerSetting oppSetting)
@@ -43,8 +43,20 @@ public class MenuSceneScript : MonoBehaviour
         ChangeToPlayScene(PlayerSetting.My, PlayerSetting.Cpu);
     }
 
+    public void CPUvsCPUStart()
+    {
+        ChangeToPlayScene(PlayerSetting.Cpu, PlayerSetting.Cpu);
+    }
+
+    [System.Obsolete]
     public void JumpToNoccaHP()
     {
+        string url = "http://www.undanoga.com/";
+        //Application.OpenURL("http://www.undanoga.com/");
+    #if UNITY_WEBGL
+        Application.ExternalEval(string.Format("window.open('{0}','_blank')", url));
+    #else
         Application.OpenURL("http://www.undanoga.com/");
+    #endif
     }
 }

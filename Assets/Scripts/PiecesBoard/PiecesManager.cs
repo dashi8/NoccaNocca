@@ -89,7 +89,9 @@ namespace PiecesBoard
             canMovePoints = new Point[]{ };
 
             myMove = getMoveGenerator("MyMove");
+            myMove.setPlayer(1);
             oppMove = getMoveGenerator("OppMove");
+            oppMove.setPlayer(-1);
         }
 
         // Update is called once per frame
