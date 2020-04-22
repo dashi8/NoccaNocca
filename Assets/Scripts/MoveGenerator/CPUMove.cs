@@ -21,7 +21,7 @@ namespace MoveGenerator
         //isWaiting_flame用
         int waitFlameCounter = 0;
 
-        public CPUMove(NOCCACore nocca)
+        public void SetNoccaObject(NOCCACore nocca)
         {
             this.nocca = nocca;
         }
@@ -45,7 +45,8 @@ namespace MoveGenerator
         {
             if (willSelectMovingPiece)
             {
-                if (isWaiting_flame(30))
+                Debug.Log((int)(3f / (4f * Time.deltaTime)));
+                if (isWaiting_flame((int)(3f / (4f * Time.deltaTime))))
                 {
                     return null;
                 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace MoveGenerator {
-    public abstract class AMoveGenerator
+    public abstract class AMoveGenerator: MonoBehaviour
     {
         //NOCCACOre.MyGoalPoint, OppGoalPointとかぶらないように設定しないとだめ．．．
         //というかここで保管するべき？

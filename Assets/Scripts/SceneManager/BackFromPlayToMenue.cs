@@ -17,6 +17,13 @@ public class BackFromPlayToMenue : MonoBehaviour
 
     public void toMenuScene()
     {
-        SceneManager.LoadScene("MenuScene");
+        if (PhotonManager.Instance != null)
+        {
+            PhotonManager.Instance.BacktoMenu();
+        }
+        else
+        {
+            SceneManager.LoadScene("MenuScene");
+        }
     }
 }

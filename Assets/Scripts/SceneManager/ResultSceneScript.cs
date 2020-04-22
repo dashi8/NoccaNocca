@@ -43,7 +43,13 @@ public class ResultSceneScript : MonoBehaviour
 
     public void toPlayScene()
     {
-
-        MenuSceneScript.ChangeToPlayScene(MenuSceneScript.myPlayerSetting,MenuSceneScript.oppPlayerSetting);
+        if (MenuSceneScript.myPlayerSetting == PlayerSetting.MyOnline)
+        {
+            SceneManager.LoadScene("ConnectPhotonRoomScene");
+        }
+        else
+        {
+            MenuSceneScript.ChangeToPlayScene(MenuSceneScript.myPlayerSetting, MenuSceneScript.oppPlayerSetting);
+        }
     }
 }

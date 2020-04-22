@@ -6,7 +6,8 @@ using UnityEngine.SceneManagement;
 public enum PlayerSetting
 {
     My,
-    Cpu
+    Cpu,
+    MyOnline
 }
 
 public class MenuSceneScript : MonoBehaviour
@@ -41,6 +42,11 @@ public class MenuSceneScript : MonoBehaviour
     public void MYvsCPUStart()
     {
         ChangeToPlayScene(PlayerSetting.My, PlayerSetting.Cpu);
+    }
+
+    public void OnlineStart()
+    {
+        SceneManager.LoadScene("ConnectPhotonRoomScene");
     }
 
     public void CPUvsCPUStart()

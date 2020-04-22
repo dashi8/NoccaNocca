@@ -6,6 +6,8 @@ using System;
 using UnityEngine.SceneManagement;
 using UniRx.Async;
 using MoveGenerator;
+using Photon.Pun;//using Photon.Realtime;
+
 
 public struct Point
 {
@@ -17,6 +19,7 @@ public struct Point
         this.z = z;
     }
 
+    //演算子オーバロード
     public static bool operator ==(Point p1, Point p2)
     {
         return (p1.x==p2.x && p1.z==p2.z);
@@ -28,6 +31,14 @@ public struct Point
     public static Point operator +(Point p1, Point p2)
     {
         return new Point(p1.x+p2.x,p1.z+p2.z);
+    }
+    public static Point operator -(Point p)
+    {
+        return new Point(-p.x, -p.z);
+    }
+    public static Point operator -(Point p1, Point p2)
+    {
+        return p1 + (-p2);
     }
 }
 
@@ -62,8 +73,13 @@ namespace PiecesBoard
 
     public class PiecesManager : MonoBehaviour
     {
+        public GameObject CPUMovePrefab;
+        public GameObject MyMovePrefab;
+        public GameObject MyMoveOnlinePrefab;
+
         NOCCACore nocca = new NOCCACore();
         GameState gameState;
+        public static bool oppFirst = false; // オンライン対戦の時には，一方だけtrueになる
 
         AMoveGenerator myMove = null;
         AMoveGenerator oppMove = null;
@@ -84,6 +100,7 @@ namespace PiecesBoard
         // Start is called before the first frame update
         void Start()
         {
+            nocca.InverseTurn(oppFirst);
             gameState = GameState.noinited;
             selectedPieceScript = null;
             canMovePoints = new Point[]{ };
@@ -137,9 +154,24 @@ namespace PiecesBoard
             {
                 case PlayerSetting.My:
                     //Start()で呼ぶとなぜかfindできない
-                    return new MyMove();
+                    return Instantiate(MyMovePrefab).GetComponent<MyMove>();
                 case PlayerSetting.Cpu:
-                    return new CPUMove(nocca);
+                    var CPUMove = Instantiate(CPUMovePrefab).GetComponent<CPUMove>();
+                    CPUMove.SetNoccaObject(nocca);
+                    return CPUMove;
+                case PlayerSetting.MyOnline:
+                    //MyMoveとOppMoveには同じインスタンスが格納される
+                    MyMoveOnline myMoveOnline;
+                    if (MyMoveOnline.LocalMoveInstance == null)
+                    {
+                        //Photon viewコンポーネントを含むprefabはPhotonNetwork.Instantiateでインスタンス化
+                        myMoveOnline = PhotonNetwork.Instantiate(MyMoveOnlinePrefab.name, new Vector3(0, 0, 0), Quaternion.identity, 0).GetComponent<MyMoveOnline>();
+                    }
+                    else
+                    {
+                        myMoveOnline = MyMoveOnline.LocalMoveInstance.GetComponent<MyMoveOnline>();
+                    }
+                    return myMoveOnline;
                 default:
                     return new MyMove();
             }
@@ -150,6 +182,11 @@ namespace PiecesBoard
             //ゲーム終了後，駒が移動するまで少し待機
             await UniTask.Delay(TimeSpan.FromSeconds(1));
 
+            if(PhotonNetwork.InRoom)
+            {
+                MyMoveOnline.LocalMoveInstance = null;
+                PhotonManager.Instance.LeaveRoom();
+            }
             SceneManager.LoadScene("ResultScene");
             //SceneManager.LoadScene("MenuScene");
         }
@@ -165,8 +202,8 @@ namespace PiecesBoard
             {
                 tmpInput = oppMove.GetInputPoint();
             }
-            
-            if(tmpInput != null && tmpInput != myMove.clickedNonIMyInputObject)
+
+            if (tmpInput != null && tmpInput != myMove.clickedNonIMyInputObject)
             {
                 canMovePoints = nocca.CanMovePointsFrom(tmpInput.Value);
                 if (canMovePoints.Length > 0)
@@ -221,9 +258,21 @@ namespace PiecesBoard
 
         void InitUnirx()
         {
+            //PlayerIndicator
             var PIScript = GameObject.FindGameObjectWithTag("IndicatorTag").GetComponent<PlayerIndicatorScript>();
             PIScript.RegistTurnReactiveProperty(nocca.isMyTurn);
             gameState = GameState.waiteForSlectingPiece;
+
+            //Online
+            if (MenuSceneScript.myPlayerSetting == PlayerSetting.MyOnline)
+            {
+                //Onlineのときは，myPlayerSetting, oppPlayerSettingともにPlayerSetting.MyOnlineになってるはず
+                //myMoveとoppMoveは同じインスタンスであるため，myMoveだけ実行
+                if (myMove is MyMoveOnline moveAsOnline)
+                {
+                    moveAsOnline.RegistTurnReactiveProperty(nocca.isMyTurn);
+                }
+            }
         }
 
         PieceScript getPieceScript(Point p)

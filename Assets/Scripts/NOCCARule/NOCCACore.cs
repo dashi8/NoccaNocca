@@ -48,6 +48,12 @@ namespace NOCCARule
             }
         }
 
+        public void InverseTurn(bool oppFirst)
+        {
+            //oppFirst==trueのとき，1ターン目でisMyTurn = false
+            _isMyTurn.Value = !oppFirst;
+        }
+
         public int Move(Point pre, Point next)
         {
             //動かせるPointが渡されること前提
