@@ -9,12 +9,6 @@ namespace MoveGenerator
 {
     public class RuleCPU : CPUMoveBase
     {
-        // Start is called before the first frame update
-        void Start()
-        {
-
-        }
-
         //Pcandidateの中から動かす駒と行き先を選んで，それぞれmovingPointとdestinationPointへ
         override protected void SelectPolicy()
         {

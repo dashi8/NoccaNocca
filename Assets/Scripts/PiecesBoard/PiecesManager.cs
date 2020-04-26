@@ -134,6 +134,16 @@ namespace PiecesBoard
             }
         }
 
+        public void RestartGame()
+        {
+            nocca.RestartGame();
+            nocca.InverseTurn(oppFirst);
+            PiecesBoardGenerator.InitPiecesPlace();
+            gameState = GameState.noinited;
+            selectedPieceScript = null;
+            canMovePoints = new Point[] { };
+        }
+
         AMoveGenerator getMoveGenerator(string player)
         {
             PlayerSetting playerSetting = MenuSceneScript.myPlayerSetting;

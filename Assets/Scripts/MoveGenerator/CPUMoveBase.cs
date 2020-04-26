@@ -58,7 +58,10 @@ namespace MoveGenerator
 
                     //手を選択
                     SelectPolicy();
-                    willSelectMovingPiece = false;
+                    if(movingPoint != null)
+                    {
+                        willSelectMovingPiece = false;
+                    }
                     return movingPoint;
                 }
             }

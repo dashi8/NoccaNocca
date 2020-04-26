@@ -73,6 +73,16 @@ namespace PiecesBoard
                 }
             }
         }
+
+        static public void InitPiecesPlace()
+        {
+            GameObject[] pieces = GameObject.FindGameObjectsWithTag("PieceTag");
+            foreach(GameObject piece in pieces)
+            {
+                var pieceScript = piece.GetComponent<PieceScript>();
+                pieceScript.changePoint(pieceScript.defaultPoint, 0);
+            }
+        }
     }
 }
  

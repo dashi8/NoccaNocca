@@ -35,15 +35,45 @@ namespace NOCCARule
 
         public NOCCACore()
         {
+            InitState();
+        }
+
+        public void RestartGame()
+        {
+            InitState();
+        }
+
+        void InitState()
+        {
             isGameOver = false;
             winner = 0;
             _isMyTurn.Value = true;
-
             foreach (int x in new int[] { 0, XRANGE - 1 })
             {
                 for (int z = 0; z < ZRANGE; z++)
                 {
                     state[x, 0, z] = (x == 0) ? 1 : -1;
+                }
+            }
+
+            for (int x = 0; x < XRANGE; x++)
+            {
+                for(int y = 0; y < YRANGE; y++)
+                {
+                    for(int z = 0; z < ZRANGE; z++)
+                    {
+                        if (x == 0 && y == 0)
+                        {
+                            state[x, y, z] = 1;
+                        }else if (x == XRANGE - 1 && y == 0)
+                        {
+                            state[x, y, z] = -1;
+                        }
+                        else
+                        {
+                            state[x, y, z] = 0;
+                        }
+                    }
                 }
             }
         }
