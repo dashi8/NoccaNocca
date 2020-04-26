@@ -1114,7 +1114,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e234d073e61f41fb805ae093d3c76b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CPUMovePrefab: {fileID: 657931028639838683, guid: 5db41ac5e8d144ea3ab35e6e61f00467,
+  CPUMovePrefab: {fileID: 719791425250728807, guid: 5b660a1ccc3e846c2a7b632d0cf657c8,
     type: 3}
   MyMovePrefab: {fileID: 7577326824318241745, guid: 0b1ad7ad2f67e430b85068f089887207,
     type: 3}

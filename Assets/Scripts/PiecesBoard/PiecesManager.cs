@@ -156,9 +156,9 @@ namespace PiecesBoard
                     //Start()で呼ぶとなぜかfindできない
                     return Instantiate(MyMovePrefab).GetComponent<MyMove>();
                 case PlayerSetting.Cpu:
-                    var CPUMove = Instantiate(CPUMovePrefab).GetComponent<CPUMove>();
-                    CPUMove.SetNoccaObject(nocca);
-                    return CPUMove;
+                    var cpuMove = Instantiate(CPUMovePrefab).GetComponent<CPUMoveBase>();
+                    cpuMove.SetNoccaObject(nocca);
+                    return cpuMove;
                 case PlayerSetting.MyOnline:
                     //MyMoveとOppMoveには同じインスタンスが格納される
                     MyMoveOnline myMoveOnline;

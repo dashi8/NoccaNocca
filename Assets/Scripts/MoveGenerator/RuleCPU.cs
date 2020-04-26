@@ -1,76 +1,22 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using NOCCARule;
 using System;
+using NOCCARule;
 
 
 namespace MoveGenerator
 {
-    public class CPUMove : AMoveGenerator
+    public class RuleCPU : CPUMoveBase
     {
-        NOCCACore nocca = null;
-
-        //動かす駒をこれから選択する状況:true
-        //選択した駒を動かす場所を選択する状況:false
-        bool willSelectMovingPiece = true;
-
-        Point? movingPoint = null;
-        Point? destinationPoint = null;
-
-        //isWaiting_flame用
-        int waitFlameCounter = 0;
-
-        public void SetNoccaObject(NOCCACore nocca)
+        // Start is called before the first frame update
+        void Start()
         {
-            this.nocca = nocca;
-        }
 
-        bool isWaiting_flame(int waitFlames)
-        {
-            //UniTask.Delayが動かない
-            if(waitFlameCounter < waitFlames)
-            {
-                waitFlameCounter += 1;
-                return true;
-            }
-            else
-            {
-                waitFlameCounter = 0;
-                return false;
-            }
-        }
-
-        public override Point? GetInputPoint()
-        {
-            if (willSelectMovingPiece)
-            {
-                Debug.Log((int)(3f / (4f * Time.deltaTime)));
-                if (isWaiting_flame((int)(3f / (4f * Time.deltaTime))))
-                {
-                    return null;
-                }
-                else
-                {
-                    //前回選択した駒を削除
-                    movingPoint = null;
-                    destinationPoint = null;
-
-                    //手を選択
-                    SelectPolicy();
-                    willSelectMovingPiece = false;
-                    return movingPoint;
-                }
-            }
-            else
-            {
-                willSelectMovingPiece = true;
-                return destinationPoint;
-            }
         }
 
         //Pcandidateの中から動かす駒と行き先を選んで，それぞれmovingPointとdestinationPointへ
-        void SelectPolicy()
+        override protected void SelectPolicy()
         {
             int maxValue = int.MinValue;
             Point[] maxPreList = new Point[] { };
@@ -82,10 +28,10 @@ namespace MoveGenerator
             foreach (Point pre in preCandidate)
             {
                 Point[] nextCandidate = nocca.CanMovePointsFrom(pre);
-                foreach(Point next in nextCandidate)
+                foreach (Point next in nextCandidate)
                 {
                     //OppGoalに入れるならそこを選んで終わり
-                    if(next == (player == -1 ? NOCCACore.OppGoalPoint: NOCCACore.MyGoalPoint))
+                    if (next == (player == -1 ? NOCCACore.OppGoalPoint : NOCCACore.MyGoalPoint))
                     {
                         movingPoint = pre;
                         destinationPoint = next;
@@ -98,7 +44,8 @@ namespace MoveGenerator
                         maxValue = tmpValue;
                         maxPreList = new Point[] { pre };
                         maxNextList = new Point[] { next };
-                    }else if(tmpValue == maxValue)
+                    }
+                    else if (tmpValue == maxValue)
                     {
                         Array.Resize(ref maxPreList, maxPreList.Length + 1);
                         maxPreList[maxPreList.Length - 1] = pre;
@@ -138,7 +85,7 @@ namespace MoveGenerator
             valueList[valueList.Length - 1] = -NumOfAdjacentPieces(state);
 
             int sum = 0;
-            for(int i = 0; i < weightList.Length; i++)
+            for (int i = 0; i < weightList.Length; i++)
             {
                 sum += weightList[i] * valueList[i];
             }
@@ -171,7 +118,7 @@ namespace MoveGenerator
             {
                 for (int z = 0; z < NOCCACore.ZRANGE; z++)
                 {
-                    int topState = nocca.TopState(new Point(x,z), state)[0];
+                    int topState = nocca.TopState(new Point(x, z), state)[0];
                     if (topState == player)
                     {
                         ans += player == 1 ? x + 1 : 6 - x;
@@ -228,5 +175,6 @@ namespace MoveGenerator
             }
             return ans;
         }
+
     }
 }
