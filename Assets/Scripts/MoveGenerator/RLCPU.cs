@@ -13,7 +13,7 @@ namespace MoveGenerator
             if(RLAgentPrefub != null)
             {
                 RLAgent RLAgentScript = Instantiate(RLAgentPrefub).GetComponent<RLAgent>();
-                RLAgentScript.Init(this);
+                RLAgentScript.RegistRLCPU(this);
             }
         }
 
